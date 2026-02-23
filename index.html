@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>K.Daisuke Works | 社会福祉士 × IT</title>
 
-    <!-- Google Fonts の読み込み（モダンなフォントを使用） -->
+    <!-- Google Fonts の読み込み -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -14,27 +14,31 @@
         rel="stylesheet">
 
     <style>
-        /* 全体のカラースキームや変数の設定（ダークテーマ×グラスモーフィズム） */
+        /* 全体のカラースキームや変数の設定（爽やか・ライトテーマ） */
         :root {
-            --bg-color: #0f172a;
-            /* 深いネイビーの背景 */
-            --text-main: #f8fafc;
-            /* 白に近いグレーのテキスト */
-            --text-muted: #94a3b8;
-            /* 少し暗めのテキスト */
-            --accent: #38bdf8;
-            /* アクセントカラーのシアン */
-            --card-bg: rgba(255, 255, 255, 0.03);
-            /* 半透明のカード背景 */
-            --card-border: rgba(255, 255, 255, 0.08);
-            /* カードの枠線 */
+            --bg-color: #f0fdfa;
+            /* 薄いミントグリーン〜スカイブルーのベース */
+            --text-main: #334155;
+            /* スレートグレー（濃いグレーで視認性よく） */
+            --text-muted: #64748b;
+            /* 少し薄めのグレー */
+            --accent: #0ea5e9;
+            /* スカイブルー */
+            --secondary: #10b981;
+            /* ミントグリーン（爽やかさをプラス） */
+            --card-bg: rgba(255, 255, 255, 0.85);
+            /* 半透明の白カード */
+            --card-border: rgba(255, 255, 255, 1);
+            /* カードに白い枠線で清潔感を */
+            --shadow-color: rgba(14, 165, 233, 0.1);
+            /* ほんのり青い影 */
         }
 
         body {
             margin: 0;
             padding: 0;
             font-family: 'Outfit', 'Noto Sans JP', sans-serif;
-            background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
+            background: linear-gradient(135deg, #f0fdfa 0%, #e0f2fe 100%);
             color: var(--text-main);
             min-height: 100vh;
             overflow-x: hidden;
@@ -50,8 +54,8 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background-color: #020617;
-            /* 最背面の色 */
+            background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 100%);
+            /* 白〜薄緑 */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -59,23 +63,37 @@
             transition: opacity 0.8s ease-in-out, visibility 0.8s;
         }
 
-        .splash-logo {
-            font-size: 2.8rem;
-            font-weight: 600;
-            letter-spacing: 2px;
-            color: var(--text-main);
+        .splash-content {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
             opacity: 0;
             transform: translateY(20px);
             /* 上にふわっと上がってくるアニメーション */
             animation: logoFadeUp 1.5s ease forwards;
         }
 
-        .splash-logo span {
+        .splash-logo-img {
+            max-width: 130px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--shadow-color);
+        }
+
+        .splash-text {
+            font-size: 2.5rem;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .splash-text span {
             color: var(--accent);
-            /* "Works" の部分だけアクセントカラー */
+            /* "Works" の部分だけアクセント */
         }
 
         @keyframes logoFadeUp {
@@ -105,7 +123,7 @@
         #main-content {
             opacity: 0;
             transform: translateY(30px);
-            /* スプラッシュ画面が消えるのと同時に少し遅れてフェードイン */
+            /* スプラッシュ画面が消えるのと同時にフェードイン */
             transition: opacity 1s ease 0.5s, transform 1s ease 0.5s;
             max-width: 800px;
             width: 90%;
@@ -113,7 +131,6 @@
             box-sizing: border-box;
         }
 
-        /* 読み込み完了後のメインコンテンツの状態 */
         body.loaded #main-content {
             opacity: 1;
             transform: translateY(0);
@@ -122,16 +139,28 @@
         /* ヘッダー部分 */
         header {
             text-align: center;
-            margin-bottom: 60px;
+            margin-bottom: 50px;
+        }
+
+        .main-logo-img {
+            max-width: 90px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px var(--shadow-color);
+            margin-bottom: 15px;
+            transition: transform 0.3s ease;
+        }
+
+        .main-logo-img:hover {
+            transform: scale(1.05);
         }
 
         header h1 {
-            font-size: 2.8rem;
+            font-size: 2.6rem;
             margin: 0;
             font-weight: 700;
             letter-spacing: 1px;
-            /* グラデーションテキスト */
-            background: linear-gradient(90deg, #f8fafc, #38bdf8);
+            /* グリーン〜ブルーの爽やかなグラデーションテキスト */
+            background: linear-gradient(90deg, var(--secondary), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -140,34 +169,34 @@
             color: var(--text-muted);
             font-size: 1.1rem;
             margin-top: 10px;
+            font-weight: 600;
         }
 
-        /* グラスモーフィズム（すりガラス効果）を適用したカード */
+        /* クリーンなグラスモーフィズムカード */
         .card {
             background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 16px;
+            border: 2px solid var(--card-border);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 20px;
             padding: 40px;
             margin-bottom: 30px;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 10px 40px var(--shadow-color);
             transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
         }
 
-        /* マウスを乗せた時のホバーエフェクト */
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-            border-color: rgba(56, 189, 248, 0.3);
+            box-shadow: 0 15px 50px rgba(14, 165, 233, 0.2);
+            border-color: rgba(14, 165, 233, 0.4);
         }
 
         h2 {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             color: var(--text-main);
             margin-top: 0;
             margin-bottom: 25px;
-            border-bottom: 1px solid var(--card-border);
+            border-bottom: 2px dashed rgba(14, 165, 233, 0.3);
             padding-bottom: 10px;
             display: inline-block;
         }
@@ -176,7 +205,7 @@
             font-size: 1.05rem;
             line-height: 1.8;
             margin-bottom: 30px;
-            color: #cbd5e1;
+            color: #475569;
         }
 
         .list-items {
@@ -186,24 +215,34 @@
         }
 
         .list-items li {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             display: flex;
-            align-items: flex-start;
+            align-items: center;
+            /* 中央揃えに */
             gap: 15px;
             line-height: 1.6;
+            background: rgba(255, 255, 255, 0.6);
+            padding: 10px 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+            transition: background 0.2s ease;
+        }
+
+        .list-items li:hover {
+            background: rgba(255, 255, 255, 0.9);
         }
 
         /* 装飾的なタグ */
         .tag {
-            background: rgba(56, 189, 248, 0.1);
-            color: var(--accent);
-            padding: 4px 14px;
+            background: linear-gradient(135deg, var(--secondary), var(--accent));
+            color: white;
+            padding: 5px 14px;
             border-radius: 20px;
             font-size: 0.85rem;
             font-weight: 600;
-            border: 1px solid rgba(56, 189, 248, 0.2);
             white-space: nowrap;
             letter-spacing: 1px;
+            box-shadow: 0 3px 10px rgba(14, 165, 233, 0.3);
         }
 
         .contact-info {
@@ -211,24 +250,29 @@
             padding: 10px 0;
         }
 
-        /* メールボタンのデザイン */
+        .contact-text {
+            color: #475569;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        /* メールボタンのデザイン（明るめ） */
         .email-link {
             display: inline-block;
-            margin-top: 25px;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: #ffffff;
             text-decoration: none;
-            padding: 12px 35px;
+            padding: 14px 40px;
             border-radius: 30px;
-            background: linear-gradient(135deg, #0ea5e9, #2563eb);
+            background: linear-gradient(135deg, var(--accent), #3b82f6);
             transition: all 0.3s ease;
             font-weight: 600;
-            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
         }
 
         .email-link:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.5);
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.5);
         }
 
         footer {
@@ -236,9 +280,10 @@
             margin-top: 50px;
             color: var(--text-muted);
             font-size: 0.9rem;
+            padding-bottom: 30px;
         }
 
-        /* スマホ向けのレイアウト調整 */
+        /* スマホ向けレイアウト */
         @media (max-width: 600px) {
             header h1 {
                 font-size: 2.2rem;
@@ -250,11 +295,16 @@
 
             .list-items li {
                 flex-direction: column;
+                align-items: flex-start;
                 gap: 8px;
             }
 
-            .splash-logo {
+            .splash-text {
                 font-size: 2rem;
+            }
+
+            .splash-logo-img {
+                max-width: 100px;
             }
         }
     </style>
@@ -264,14 +314,20 @@
 
     <!-- 1. スプラッシュ（ローディング）画面 -->
     <div id="splash-screen">
-        <div class="splash-logo">
-            K.Daisuke <span>Works</span>
+        <div class="splash-content">
+            <!-- 作成したロゴ画像 -->
+            <img src="logo.png" alt="K.Daisuke Works Logo" class="splash-logo-img">
+            <div class="splash-text">
+                K.Daisuke <span>Works</span>
+            </div>
         </div>
     </div>
 
     <!-- 2. メインコンテンツ（最初は非表示） -->
     <div id="main-content">
         <header>
+            <!-- メインページにもロゴを表示 -->
+            <img src="logo.png" alt="K.Daisuke Works Logo" class="main-logo-img">
             <h1>K.Daisuke Works</h1>
             <p>社会福祉士 | ITエンジニア（VBAエキスパート）</p>
         </header>
@@ -292,7 +348,7 @@
         <section class="card">
             <h2>Contact</h2>
             <div class="contact-info">
-                <p>お仕事のご依頼・ご相談などはこちらのメールアドレスまでお願いいたします。</p>
+                <p class="contact-text">お仕事のご依頼・ご相談などはこちらのメールアドレスまでお願いいたします。</p>
                 <a href="mailto:k.daisuke.works@gmail.com" class="email-link">
                     ✉ k.daisuke.works@gmail.com
                 </a>
@@ -308,11 +364,10 @@
     <!-- スプラッシュ画面を制御するJavaScript -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            // ページ読み込み完了後、2秒（2000ミリ秒）待機してから表示を切り替える
+            // ページ読み込み完了後、2.5秒待機してから表示を切り替える (ロゴを見せるため少し長め)
             setTimeout(() => {
-                // body要素に 'loaded' クラスを追加すると、CSSのアニメーションが発動してメインコンテンツが表示される
                 document.body.classList.add('loaded');
-            }, 2000);
+            }, 2500);
         });
     </script>
 </body>
