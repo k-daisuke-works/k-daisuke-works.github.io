@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Work AI Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Outfit:wght@300;700&family=Noto+Sans+JP:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #020617;
+            --bg-card: rgba(30, 41, 59, 0.6);
+            --bg-glass: rgba(15, 23, 42, 0.8);
+            --accent-blue: #3b82f6;
+            --accent-gold: #fbbf24;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-glass: rgba(255, 255, 255, 0.1);
+            --font-main: 'Inter', 'Noto Sans JP', sans-serif;
+            --font-title: 'Outfit', sans-serif;
+            --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(circle at 0% 0%, rgba(59, 130, 246, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 100% 100%, rgba(251, 191, 36, 0.05) 0%, transparent 40%);
+        }
+
+        .hub-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1.5rem 1rem;
+            text-align: center;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        header {
+            margin-bottom: 1.2rem;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .hub-title {
+            font-family: var(--font-title);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-blue) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hub-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 0;
+        }
+
+        .tool-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .tool-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 0.7rem 1.2rem;
+            text-align: left;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+            opacity: 0;
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+
+        .tool-card:hover {
+            transform: translateX(10px);
+            border-color: var(--accent-blue);
+            background: rgba(30, 41, 59, 0.8);
+            box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.4);
+        }
+
+        .tool-card-content {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+            gap: 1.2rem;
+        }
+
+        .tool-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .tool-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .tool-text {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            flex-grow: 1;
+        }
+
+        .tool-card h3 {
+            font-family: var(--font-title);
+            font-size: 1.1rem;
+            margin-bottom: 0.1rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .tool-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-glass);
+            color: #fff;
+            border-radius: 50%;
+            font-size: 0.85rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .tool-card p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            line-height: 1.3;
+            margin: 0;
+        }
+
+        .tool-badge {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .bg-info {
+            background: var(--accent-blue);
+            color: #fff;
+        }
+
+        .bg-warning {
+            background: var(--accent-gold);
+            color: #020617;
+        }
+
+        .bg-success {
+            background: var(--accent-green);
+            color: #fff;
+        }
+
+        .bg-danger {
+            background: var(--accent-red);
+            color: #fff;
+        }
+
+        .btn-launch {
+            background: var(--accent-blue);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            text-align: center;
+            transition: var(--transition);
+            white-space: nowrap;
+            margin-left: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .tool-card:hover .btn-launch {
+            background: #fff;
+            color: var(--accent-blue);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        footer {
+            margin-top: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="hub-container">
+        <header>
+            <h1 class="hub-title">Social Work AI Portal</h1>
+            <p class="hub-subtitle">各ツールの機能を起動順に実行して、専門的な支援をサポートします。</p>
+        </header>
+
+        <div class="tool-grid">
+            <!-- 1. 配布・印刷資料生成 -->
+            <a href="事例スライド生成(配布・印刷用)/index.html" target="_blank" class="tool-card" style="animation-delay: 0.1s;">
+                <div class="tool-card-content">
+                    <div class="tool-icon">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                        </svg>
+                    </div>
+                    <div class="tool-text">
+                        <h3><span class="tool-number">1</span> 配布・印刷資料生成 <span class="tool-badge bg-danger">資料作成</span>
+                        </h3>
+                        <p>事例文からA4印刷・配布用の資料を自動生成します。</p>
+                    </div>
+                </div>
+                <div class="btn-launch">起動</div>
+            </a>
+
+            <!-- 2. HTML反映ツール -->
+            <a href="HTML反映ツール/index.html" target="_blank" class="tool-card" style="animation-delay: 0.2s;">
+                <div class="tool-card-content">
+                    <div class="tool-icon" style="color: #8b5cf6; background: rgba(139, 92, 246, 0.1);">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <polyline points="16 18 22 12 16 6"></polyline>
+                            <polyline points="8 6 2 12 8 18"></polyline>
+                        </svg>
+                    </div>
+                    <div class="tool-text">
+                        <h3><span class="tool-number">2</span> HTML反映ツール <span class="tool-badge"
+                                style="background: #8b5cf6; color: #fff;">開発補助</span>
+                        </h3>
+                        <p>コードを貼り付け、新しいタブで実際のブラウザ表示を即座にプレビューします。</p>
+                    </div>
+                </div>
+                <div class="btn-launch">起動</div>
+            </a>
+
+            <!-- 3. プレゼンスライド -->
+            <a href="事例スライド生成(プレゼン用)/index.html" target="_blank" class="tool-card" style="animation-delay: 0.3s;">
+                <div class="tool-card-content">
+                    <div class="tool-icon">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                            <path d="M3 9h18M9 21V9" />
+                        </svg>
+                    </div>
+                    <div class="tool-text">
+                        <h3><span class="tool-number">3</span> プレゼンスライド <span class="tool-badge bg-success">プレゼン</span>
+                        </h3>
+                        <p>PDFや画像を直接ドロップし、スライドショー形式で表示します。</p>
+                    </div>
+                </div>
+                <div class="btn-launch">起動</div>
+            </a>
+
+            <!-- 4. シミュレート記録 -->
+            <a href="シミュレート結果生成/index.html" target="_blank" class="tool-card" style="animation-delay: 0.4s;">
+                <div class="tool-card-content">
+                    <div class="tool-icon">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 20V10M18 20V4M6 20v-4" />
+                        </svg>
+                    </div>
+                    <div class="tool-text">
+                        <h3><span class="tool-number">4</span> シミュレート記録 <span class="tool-badge bg-info">経過記録</span>
+                        </h3>
+                        <p>支援の経過テキストから可視化スライドを生成します。</p>
+                    </div>
+                </div>
+                <div class="btn-launch">起動</div>
+            </a>
+
+            <!-- 5. 事例総括生成 -->
+            <a href="事例総括生成/index.html" target="_blank" class="tool-card" style="animation-delay: 0.5s;">
+                <div class="tool-card-content">
+                    <div class="tool-icon" style="color: #ec4899; background: rgba(236, 72, 153, 0.1);">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"
+                            viewBox="0 0 24 24">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                    </div>
+                    <div class="tool-text">
+                        <h3><span class="tool-number">5</span> 事例総括生成 <span class="tool-badge"
+                                style="background: #ec4899; color: #fff;">総括記録</span></h3>
+                        <p>初期から最終までの全シミュレートを経て得られた、対応の全体像と総括をスライド化します。</p>
+                    </div>
+                </div>
+                <div class="btn-launch">起動</div>
+            </a>
+
+            <!-- 6. 評価点比較分析 -->
+            <a href="評価点グラフ化/index.html" target="_blank" class="tool-card" style="animation-delay: 0.6s;">
+                <div class="tool-card-content">
+                    <div class="tool-icon">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2v20M2 12h20M12 2a10 10 0 1 0 10 10" />
+                        </svg>
+                    </div>
+                    <div class="tool-text">
+                        <h3><span class="tool-number">6</span> 評価点比較分析 <span class="tool-badge bg-warning">多角分析</span>
+                        </h3>
+                        <p>CSVデータからAIとの比較レーダーチャートを表示します。</p>
+                    </div>
+                </div>
+                <div class="btn-launch">起動</div>
+            </a>
+        </div>
+
+        <footer>
+            &copy; 2026 Social Work AI Portal.
+        </footer>
+    </div>
+</body>
+
+</html>

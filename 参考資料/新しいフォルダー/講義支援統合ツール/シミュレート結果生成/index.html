@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>シミュレーション結果 スライドジェネレーター</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-color: #f1f5f9;
+            --accent-color: #38bdf8;
+            --danger-color: #f43f5e;
+            --warning-color: #fbbf24;
+            --success-color: #10b981;
+        }
+
+        body {
+            font-family: 'Inter', 'Noto Sans JP', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Views */
+        #view-input {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            box-sizing: border-box;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        #view-slides {
+            width: 100%;
+            display: none;
+            /* 初期は非表示 */
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            box-sizing: border-box;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            letter-spacing: 1px;
+            font-size: 2.5rem;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        /* -------------------------------------
+           Input View Styles
+           ------------------------------------- */
+        .input-container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            box-sizing: border-box;
+        }
+
+        .input-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 15px;
+        }
+
+        .input-header h2 {
+            margin: 0;
+            color: var(--accent-color);
+            font-size: 1.6rem;
+        }
+
+        .step-group {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: none;
+            /* 初期は非表示 */
+            animation: fadeInStep 0.5s ease forwards;
+        }
+
+        .step-group.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes fadeInStep {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 12px;
+        }
+
+        .step-badge {
+            background: var(--accent-color);
+            color: #0f172a;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .step-title-text {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #e0f2fe;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 180px;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #ffffff;
+            padding: 15px;
+            font-family: inherit;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            resize: vertical;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.3);
+        }
+
+        textarea::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--accent-color);
+            color: #0f172a;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: #7dd3fc;
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            font-size: 0.9rem;
+            padding: 8px 16px;
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-next-step {
+            background: transparent;
+            color: var(--accent-color);
+            border: 2px dashed var(--accent-color);
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+        }
+
+        .btn-next-step:hover {
+            background: rgba(56, 189, 248, 0.1);
+            color: #7dd3fc;
+        }
+
+        .btn-generate {
+            width: 100%;
+            padding: 18px;
+            font-size: 1.3rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn-generate:hover {
+            background: linear-gradient(135deg, #34d399, #10b981);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.6);
+        }
+
+        /* -------------------------------------
+           Slides View Styles
+           ------------------------------------- */
+        .slides-top-bar {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            box-sizing: border-box;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-print {
+            background: #10b981;
+            color: #fff;
+        }
+
+        .btn-print:hover {
+            background: #059669;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 30px;
+            padding: 5px;
+        }
+
+        .toggle-btn {
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            color: rgba(255, 255, 255, 0.6);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toggle-btn.active {
+            background: var(--accent-color);
+            color: #0f172a;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .slide-container {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .slide {
+            background: #ffffff;
+            color: #1e293b;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            page-break-inside: avoid;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide-header {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #0f172a;
+            border-bottom: 4px solid var(--accent-color);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            line-height: 1.3;
+        }
+
+        .slide-badge {
+            display: inline-block;
+            padding: 8px 18px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .bg-danger {
+            background: var(--danger-color);
+        }
+
+        .bg-warning {
+            background: var(--warning-color);
+        }
+
+        .bg-success {
+            background: var(--success-color);
+        }
+
+        .bg-secondary {
+            background: #64748b;
+        }
+
+        .slide-section-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #0284c7;
+            margin-bottom: 15px;
+            background: #f0f9ff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border-left: 5px solid #0284c7;
+        }
+
+        .slide-text-block {
+            line-height: 1.7;
+            margin-bottom: 15px;
+            font-size: 1.15rem;
+            color: #334155;
+            display: flex;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .slide-text {
+            flex: 1;
+            margin: 0;
+            white-space: pre-wrap;
+        }
+
+        .score {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #eff6ff;
+            color: #2563eb;
+            font-weight: bold;
+            border-radius: 50%;
+            min-width: 36px;
+            height: 36px;
+            margin-left: 12px;
+            border: 2px solid #bfdbfe;
+            font-size: 1rem;
+        }
+
+        /* 特大文字モード (読む用) */
+        body.large-text-mode .slide-container {
+            max-width: 1200px;
+        }
+
+        body.large-text-mode .slide {
+            padding: 50px;
+        }
+
+        body.large-text-mode .slide-header {
+            font-size: 2.5rem;
+            border-bottom-width: 6px;
+            padding-bottom: 20px;
+            margin-bottom: 35px;
+        }
+
+        body.large-text-mode .slide-badge {
+            font-size: 1.5rem;
+            padding: 10px 24px;
+        }
+
+        body.large-text-mode .slide-section-title {
+            font-size: 1.8rem;
+            padding: 15px 20px;
+            border-left-width: 6px;
+            margin-bottom: 25px;
+        }
+
+        body.large-text-mode .slide-text-block {
+            font-size: 1.6rem;
+            line-height: 1.8;
+            margin-bottom: 25px;
+        }
+
+        body.large-text-mode .score {
+            min-width: 48px;
+            height: 48px;
+            font-size: 1.4rem;
+            border-width: 3px;
+        }
+
+        /* Slide Tabs */
+        .slide-tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .slide-tab {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--card-border);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 12px 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1.15rem;
+            transition: all 0.3s ease;
+        }
+
+        .slide-tab:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .slide-tab.active {
+            background: var(--accent-color);
+            color: #0f172a;
+            box-shadow: 0 4px 15px rgba(56, 189, 248, 0.4);
+        }
+
+        .slide-wrapper {
+            display: none;
+            width: 100%;
+        }
+
+        .slide-wrapper.active {
+            display: block;
+            animation: fadeIn 0.4s ease forwards;
+        }
+
+        /* 印刷用 */
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+                padding: 0;
+                margin: 0;
+            }
+
+            #view-input,
+            .slides-top-bar,
+            .next-action-container,
+            h1 {
+                display: none !important;
+            }
+
+            #view-slides {
+                display: flex !important;
+                padding: 0 !important;
+            }
+
+            .slide-tabs {
+                display: none !important;
+            }
+
+            .slide-wrapper:not(.active) {
+                display: none !important;
+            }
+
+            .slide-wrapper.active {
+                display: block !important;
+            }
+
+            .slide-container {
+                max-width: 100% !important;
+                gap: 0;
+            }
+
+            .slide {
+                box-shadow: none !important;
+                border: 2px solid #cbd5e1 !important;
+                border-radius: 0 !important;
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="view-input">
+        <h1>シミュレーショントラッカー</h1>
+
+        <div class="input-container">
+            <div class="input-header">
+                <h2>� 入力ダッシュボード</h2>
+                <button class="btn btn-outline" id="btn-load-sample">サンプルデータを入力</button>
+            </div>
+
+            <div id="input-flow">
+                <!-- Step 1: 初期対応 -->
+                <div class="step-group active" id="group-init">
+                    <div class="step-header">
+                        <div class="step-badge">1</div>
+                        <div class="step-title-text">初期対応の記録</div>
+                    </div>
+                    <textarea id="input-init" placeholder="初期対応のテキストを貼り付けてください..."></textarea>
+                    <button class="btn btn-next-step" id="btn-next-mid">＋ 中間対応を入力する</button>
+                </div>
+
+                <!-- Step 2: 中間対応 (最初は非表示) -->
+                <div class="step-group" id="group-mid">
+                    <div class="step-header">
+                        <div class="step-badge">2</div>
+                        <div class="step-title-text">中間対応の記録</div>
+                    </div>
+                    <textarea id="input-mid" placeholder="中間対応のテキストを貼り付けてください..."></textarea>
+                    <button class="btn btn-next-step" id="btn-next-final">＋ 最終対応を入力する</button>
+                </div>
+
+                <!-- Step 3: 最終対応 (最初は非表示) -->
+                <div class="step-group" id="group-final">
+                    <div class="step-header">
+                        <div class="step-badge">3</div>
+                        <div class="step-title-text">最終対応の記録</div>
+                    </div>
+                    <textarea id="input-final" placeholder="最終対応のテキストを貼り付けてください..."></textarea>
+                </div>
+            </div>
+
+            <!-- Generate Button -->
+            <button class="btn btn-generate" id="btn-generate">✨ 入力内容からスライドを生成する</button>
+        </div>
+    </div>
+
+    <div id="view-slides">
+        <div class="slides-top-bar">
+            <button class="btn btn-back" id="btn-back">⬅️ 入力画面に戻る</button>
+
+            <div class="toggle-container">
+                <div class="toggle-btn active" id="toggle-normal">📑 通常サイズ (印刷用)</div>
+                <div class="toggle-btn" id="toggle-large">👓 特大サイズ (読む用)</div>
+            </div>
+
+            <button class="btn btn-print" id="btn-print">🖨️ スライドを印刷する</button>
+        </div>
+
+        <div class="slide-container" id="slide-container">
+            <!-- Slides will be generated here -->
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const viewInput = document.getElementById('view-input');
+        const viewSlides = document.getElementById('view-slides');
+
+        const inputInit = document.getElementById('input-init');
+        const inputMid = document.getElementById('input-mid');
+        const inputFinal = document.getElementById('input-final');
+
+        const groupMid = document.getElementById('group-mid');
+        const groupFinal = document.getElementById('group-final');
+        const btnNextMid = document.getElementById('btn-next-mid');
+        const btnNextFinal = document.getElementById('btn-next-final');
+
+        const btnGenerate = document.getElementById('btn-generate');
+        const btnBack = document.getElementById('btn-back');
+        const slideContainer = document.getElementById('slide-container');
+
+        const btnLoadSample = document.getElementById('btn-load-sample');
+        const btnPrint = document.getElementById('btn-print');
+        const toggleNormal = document.getElementById('toggle-normal');
+        const toggleLarge = document.getElementById('toggle-large');
+
+        // Sample Data
+        const sampleInit = `【シミュレーション結果：4ヶ月後】\n\n判定: C: 悪化\n\n1. 現場の変化（Fact）\n\n毎日病室へ足を運び日常会話を試みたが、C氏は「家のことが心配でそれどころではない」と焦燥感を募らせ、会話が深まらない状態が続いた 。\n+1\n\n面会に来た夫（D氏）は、頻繁に接触するMSWを「退院を延ばしてサービスを売り込もうとしている業者」と見なし、強い警戒心を露わにした 。\n\nMSWが日常会話の中で「家での生活」に触れるたび、C氏は「完璧にやらなければ」という強迫的な心理バリア（H）を刺激され、リハビリへの意欲が逆に低下した 。\n+1\n\n2. 発生した新たな課題（Next Challenge）\n\n夫から「しつこい。もう相談員とは話さない。さっさと家に帰せ」と拒絶され、窓口が閉ざされた。\n\n介入が「本人への日常会話」に終始したことで、疲弊している長女（E氏）のキーパーソンとしてのアセスメントや、夫の価値観へのアプローチが放置され、退院後の「介護共倒れ」リスクがより深刻化した 。\n+1`;
+        const sampleMid = `【シミュレーション結果：8ヶ月後】\n\n判定: D: 決裂\n\n1. 現場の変化（Fact）\n\nMSWが粘り強く訪問を続けたものの、夫（D氏）の態度は硬化の一途をたどり、ついに「相談員を代えろ、二度と来るな」と病院側に正式なクレームが入った 。\n+3\n\n本人（C氏）は病院内で「早く帰ってご飯を作らなきゃ」という焦燥感から勝手に立ち上がろうとして転倒を繰り返し、大腿骨を骨折。自宅復帰は絶望的となった 。\n+2\n\n長女（E氏）は、父親の怒りと母親の再骨折の板挟みになり、心身の限界を超えて沈黙。相談窓口からも姿を消した 。\n+2\n\n2. 発生した新たな課題（Next Challenge）\n\n本人のADLが大幅に低下し、当初の「自宅復帰」という目標が物理的に不可能となった 。\n\n家族の「相談員への不信感」が頂点に達しており、今後の施設入所等の調整において、法的手段（成年後見制度の検討等）を含めた極めて困難な局面を迎えている 。\n+2`;
+        const sampleFinal = `【シミュレーション結果：12ヶ月後（最終報告）】\n\n判定: D: 決裂（支援失敗）\n\n1. 現場の変化（Fact）\n\n関係構築にこだわり、客観的なリスク（再転倒・骨折）を「事実」として家族に突きつけなかったため、夫（D氏）は「病院の不手際で妻が歩けなくなった」と主張し、損害賠償を求めて病院を提訴する事態となった 。\n+1\n\n長女（E氏）は重度の抑うつ状態に陥り、実家を離れて失踪。介護の担い手が完全に消失した。\n\n本人（C氏）は骨折後のリハビリも拒否し、寝たきり状態で認知症が進行。「早く帰って食事を…」といううわ言のみを繰り返している。\n\n2. 発生した新たな課題（Next Challenge）\n\nキーパーソン（長女）の消失と、夫の攻撃性により、特養入所等の契約行為が一切進められない。\n\n「関係性」というアナログで曖昧な情報を優先し、法的・制度的な「デジタル（確定）」な手続きを怠った結果、本人の生存権が脅かされる深刻な倫理性問題に発展した 。\n+1`;
+
+        // Workflow Events
+        btnNextMid.addEventListener('click', () => {
+            groupMid.classList.add('active');
+            btnNextMid.style.display = 'none';
+            setTimeout(() => inputMid.focus(), 100);
+        });
+
+        btnNextFinal.addEventListener('click', () => {
+            groupFinal.classList.add('active');
+            btnNextFinal.style.display = 'none';
+            setTimeout(() => inputFinal.focus(), 100);
+        });
+
+        // Load Sample
+        btnLoadSample.addEventListener('click', () => {
+            // Expand all groups
+            groupMid.classList.add('active');
+            groupFinal.classList.add('active');
+            btnNextMid.style.display = 'none';
+            btnNextFinal.style.display = 'none';
+
+            inputInit.value = sampleInit;
+            inputMid.value = sampleMid;
+            inputFinal.value = sampleFinal;
+        });
+
+        // Generate Slides & Switch View
+        btnGenerate.addEventListener('click', () => {
+            generateSlides();
+            viewInput.style.display = 'none';
+            viewSlides.style.display = 'flex';
+            window.scrollTo(0, 0);
+        });
+
+        // Go Back to Input
+        btnBack.addEventListener('click', () => {
+            viewSlides.style.display = 'none';
+            viewInput.style.display = 'flex';
+        });
+
+        // Mode Toggles
+        toggleNormal.addEventListener('click', () => {
+            document.body.classList.remove('large-text-mode');
+            toggleNormal.classList.add('active');
+            toggleLarge.classList.remove('active');
+        });
+
+        toggleLarge.addEventListener('click', () => {
+            document.body.classList.add('large-text-mode');
+            toggleLarge.classList.add('active');
+            toggleNormal.classList.remove('active');
+        });
+
+        // Print
+        btnPrint.addEventListener('click', () => window.print());
+
+        // Parse Text
+        function parseTextToHTML(text) {
+            if (!text || !text.trim()) return null;
+
+            let html = '';
+            // Fix: split by newline properly
+            const lines = text.split('\n');
+            let inSection = false;
+            let currentTitle = '記録';
+            let currentBadge = '';
+            let contentHtml = '';
+
+            let currentParagraph = '';
+
+            const flushParagraph = (score = null) => {
+                if (currentParagraph.trim()) {
+                    let pContent = `<div class="slide-text">${currentParagraph.trim()}</div>`;
+                    if (score) {
+                        contentHtml += `<div class="slide-text-block">${pContent}<span class="score">+${score}</span></div>`;
+                    } else {
+                        contentHtml += `<div class="slide-text-block">${pContent}</div>`;
+                    }
+                } else if (score) {
+                    contentHtml += `<div class="slide-text-block"><span class="score">+${score}</span></div>`;
+                }
+                currentParagraph = '';
+            };
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+
+                const titleMatch = line.match(/^【(.*?)】$/);
+                if (titleMatch) {
+                    currentTitle = titleMatch[1];
+                    continue;
+                }
+
+                const judgeMatch = line.match(/^判定:?\s*(.*)$/);
+                if (judgeMatch) {
+                    const status = judgeMatch[1];
+                    let badgeClass = 'bg-secondary';
+                    if (status.includes('悪化') || status.includes('決裂') || status.includes('失敗') || status.includes('D:') || status.includes('C:')) {
+                        badgeClass = 'bg-danger';
+                    } else if (status.includes('維持') || status.includes('B:')) {
+                        badgeClass = 'bg-warning';
+                    } else if (status.includes('改善') || status.includes('A:')) {
+                        badgeClass = 'bg-success';
+                    }
+                    currentBadge = `<span class="slide-badge ${badgeClass}">判定: ${status}</span>`;
+                    continue;
+                }
+
+                const sectionMatch = line.match(/^(\d+\.|[①②③④⑤])\s*(.*)$/);
+                if (sectionMatch && (line.includes('Fact') || line.includes('Challenge') || line.includes('変化') || line.includes('課題'))) {
+                    flushParagraph();
+                    if (inSection) contentHtml += '</div>';
+                    inSection = true;
+                    contentHtml += `<div class="slide-section"><h3 class="slide-section-title">${line}</h3>`;
+                    continue;
+                }
+
+                const scoreMatch = line.match(/^\+(\d+)$/);
+                if (scoreMatch) {
+                    flushParagraph(scoreMatch[1]);
+                    continue;
+                }
+
+                if (line === '') {
+                    flushParagraph();
+                    continue;
+                }
+
+                currentParagraph += (currentParagraph ? '<br>' : '') + line;
+            }
+
+            flushParagraph();
+            if (inSection) contentHtml += '</div>';
+
+            return `
+                <div class="slide-header">
+                    <span>${currentTitle}</span>
+                    ${currentBadge}
+                </div>
+                <div class="slide-content">
+                    ${contentHtml}
+                </div>
+            `;
+        }
+
+        function generateSlides() {
+            const slideData = [];
+            let currentDepth = 1;
+
+            if (inputInit.value) { slideData.push({ title: '① 初期対応', text: inputInit.value, type: 1 }); }
+            if (groupMid.classList.contains('active') && inputMid.value) { slideData.push({ title: '② 中間対応', text: inputMid.value, type: 2 }); currentDepth = 2; }
+            if (groupFinal.classList.contains('active') && inputFinal.value) { slideData.push({ title: '③ 最終対応', text: inputFinal.value, type: 3 }); currentDepth = 3; }
+
+            slideContainer.innerHTML = '';
+
+            if (slideData.length === 0) {
+                slideContainer.innerHTML = '<div style="text-align:center; padding:50px; font-size:1.5rem; color:#fff;">入力データがありません。画面上部のボタンから戻って入力してください。</div>';
+                return;
+            }
+
+            // Create Tabs area
+            const tabsDiv = document.createElement('div');
+            tabsDiv.className = 'slide-tabs';
+            slideContainer.appendChild(tabsDiv);
+
+            const wrappers = [];
+
+            slideData.forEach((data, index) => {
+                // Create Tab button
+                const tab = document.createElement('div');
+                tab.className = 'slide-tab';
+                tab.textContent = data.title;
+                tabsDiv.appendChild(tab);
+
+                // Create Wrapper for this slide
+                const wrapper = document.createElement('div');
+                wrapper.className = 'slide-wrapper';
+
+                const parsed = parseTextToHTML(data.text);
+                if (parsed) {
+                    const slide = document.createElement('div');
+                    slide.className = 'slide';
+                    slide.innerHTML = parsed;
+                    wrapper.appendChild(slide);
+                }
+
+                // Add Next Step Button in the wrapper below the slide
+                const nextActionContainer = document.createElement('div');
+                nextActionContainer.className = 'next-action-container';
+                nextActionContainer.style.textAlign = 'center';
+                nextActionContainer.style.marginTop = '20px';
+                nextActionContainer.style.marginBottom = '20px';
+
+                if (data.type === 1) {
+                    if (currentDepth === 1) {
+                        nextActionContainer.innerHTML = '<button class="btn" style="background:#38bdf8; font-size:1.15rem; padding: 15px 30px; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);">🚀 次のステップ：中間対応を入力する</button>';
+                        nextActionContainer.querySelector('button').addEventListener('click', () => {
+                            viewSlides.style.display = 'none';
+                            viewInput.style.display = 'flex';
+                            groupMid.classList.add('active');
+                            btnNextMid.style.display = 'none';
+                            setTimeout(() => {
+                                inputMid.focus();
+                                inputMid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 100);
+                        });
+                        wrapper.appendChild(nextActionContainer);
+                    }
+                } else if (data.type === 2) {
+                    if (currentDepth === 2) {
+                        nextActionContainer.innerHTML = '<button class="btn" style="background:#38bdf8; font-size:1.15rem; padding: 15px 30px; box-shadow: 0 4px 15px rgba(56, 189, 248, 0.3);">🚀 次のステップ：最終対応を入力する</button>';
+                        nextActionContainer.querySelector('button').addEventListener('click', () => {
+                            viewSlides.style.display = 'none';
+                            viewInput.style.display = 'flex';
+                            groupFinal.classList.add('active');
+                            btnNextFinal.style.display = 'none';
+                            setTimeout(() => {
+                                inputFinal.focus();
+                                inputFinal.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }, 100);
+                        });
+                        wrapper.appendChild(nextActionContainer);
+                    }
+                } else if (data.type === 3) {
+                    nextActionContainer.innerHTML = '<div style="color: #6ee7b7; font-size: 1.3rem; font-weight: bold; padding: 20px;">🎉 全ての記録が完了しました</div>';
+                    wrapper.appendChild(nextActionContainer);
+                }
+
+                slideContainer.appendChild(wrapper);
+                wrappers.push({ tab, wrapper });
+
+                // Click event for tab
+                tab.addEventListener('click', () => {
+                    wrappers.forEach(w => {
+                        w.tab.classList.remove('active');
+                        w.wrapper.classList.remove('active');
+                    });
+                    tab.classList.add('active');
+                    wrapper.classList.add('active');
+                });
+            });
+
+            // Only show tabs if there is more than 1 slide
+            if (slideData.length <= 1) {
+                tabsDiv.style.display = 'none';
+            }
+
+            // Click the last tab by default (the one just submitted)
+            if (wrappers.length > 0) {
+                wrappers[wrappers.length - 1].tab.click();
+            }
+        }
+    </script>
+</body>
+
+</html>

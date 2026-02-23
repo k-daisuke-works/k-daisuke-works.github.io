@@ -43,11 +43,64 @@
 
         body {
             font-family: 'Outfit', 'Noto Sans JP', sans-serif;
-            background-color: var(--bg-color);
+            background-color: transparent;
+            /* 背景画像を見せるため透明化 */
             color: var(--text-main);
             line-height: 1.8;
             overflow-x: hidden;
             scroll-behavior: smooth;
+        }
+
+        /* スクロール変化用背景 */
+        #fixed-bg-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -10;
+            background-color: var(--bg-color);
+        }
+
+        .scroll-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            will-change: opacity;
+        }
+
+        #bg-morning {
+            background-image: url('town_morning.png');
+            opacity: 1;
+        }
+
+        #bg-noon {
+            background-image: url('town_noon.png');
+        }
+
+        #bg-night {
+            background-image: url('town_night.png');
+        }
+
+        #fixed-bg-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 1200px;
+            height: 100vh;
+            z-index: -9;
+            background: rgba(248, 250, 252, 0.95);
+            /* 両端が見やすいよう中央のコンテンツ部分のみ白く透かす */
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.15);
+            /* 立体感を出すための影 */
         }
 
         a {
@@ -71,46 +124,51 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);
+            background-color: #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 9999;
-            transition: opacity 0.8s ease, visibility 0.8s;
+            /* 消える時に少しフワッと拡大しながら消える */
+            transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), visibility 1s, transform 1s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .splash-content {
             text-align: center;
-            animation: bounceIn 1.5s ease forwards;
+            position: relative;
+            padding: 20px;
         }
 
         .splash-logo-img {
             max-width: 140px;
             border-radius: 20px;
-            box-shadow: var(--shadow-lg);
-            margin-bottom: 20px;
+            box-shadow: 0 15px 35px rgba(2, 132, 199, 0.15);
+            margin-bottom: 25px;
+            opacity: 0;
+            /* ガタつきを防ぐため、滑らかな移動とフェードインのみに */
+            animation: fadeInRise 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
         }
 
         .splash-text {
-            font-size: 2.2rem;
-            font-weight: 700;
+            font-size: 2.5rem;
+            font-weight: 800;
             color: var(--text-dark);
             font-family: 'Outfit', sans-serif;
+            letter-spacing: 2px;
+            opacity: 0;
+            /* ロゴに少し遅れて文字が浮き上がる */
+            animation: fadeInRise 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s forwards;
+            position: relative;
         }
 
         .splash-text span {
             color: var(--primary);
         }
 
-        @keyframes bounceIn {
+        @keyframes fadeInRise {
             0% {
                 opacity: 0;
-                transform: translateY(30px);
-            }
-
-            50% {
-                opacity: 1;
-                transform: translateY(-10px);
+                transform: translateY(20px);
             }
 
             100% {
@@ -119,9 +177,18 @@
             }
         }
 
+        body.loaded .splash-content {
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        /* ロード完了で画面が消える */
         body.loaded #splash-screen {
             opacity: 0;
             visibility: hidden;
+            transform: scale(1.05);
+            /* 最後に画面全体が少し大きくなりながらフェードアウト */
         }
 
         /* ナビゲーションバー */
@@ -207,7 +274,7 @@
             display: flex;
             align-items: center;
             padding-top: 80px;
-            background: radial-gradient(circle at top right, #e0f2fe 0%, #f8fafc 100%);
+            background: radial-gradient(circle at top right, rgba(224, 242, 254, 0.6) 0%, rgba(248, 250, 252, 0) 100%);
             position: relative;
             overflow: hidden;
         }
@@ -303,6 +370,14 @@
             gap: 30px;
         }
 
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
         .card {
             background: var(--surface);
             padding: 35px;
@@ -333,7 +408,7 @@
 
         /* 研修プログラム紹介 */
         .services-bg {
-            background-color: #f0f9ff;
+            background-color: rgba(240, 249, 255, 0.6);
         }
 
         .program-card {
@@ -501,8 +576,8 @@
         /* アニメーション用 */
         .fade-in {
             opacity: 0;
-            transform: translateY(40px);
-            transition: opacity 0.8s ease, transform 0.8s ease;
+            transform: translateY(60px);
+            transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .fade-in.visible {
@@ -511,12 +586,45 @@
         }
 
         @media (max-width: 768px) {
+            .section {
+                padding: 60px 5%;
+            }
+
+            .sec-title {
+                font-size: 1.8rem;
+                margin-bottom: 35px;
+            }
+
+            .hero {
+                padding-top: 100px;
+                min-height: auto;
+                padding-bottom: 60px;
+            }
+
             .hero h1 {
                 font-size: 2.2rem;
             }
 
             .hero p {
-                font-size: 1.1rem;
+                font-size: 1.05rem;
+                margin-bottom: 30px;
+            }
+
+            .card {
+                padding: 25px 20px;
+            }
+
+            .program-header,
+            .program-body {
+                padding: 20px;
+            }
+
+            .program-header h3 {
+                font-size: 1.4rem;
+            }
+
+            .pain-points {
+                padding: 40px 20px;
             }
 
             .profile-container {
@@ -530,17 +638,60 @@
             }
 
             .cta-box h2 {
-                font-size: 1.8rem;
+                font-size: 1.6rem;
+            }
+
+            .cta-btn {
+                padding: 15px 30px;
+                font-size: 1.1rem;
+                width: 100%;
             }
 
             .tag-wrap {
                 justify-content: center;
+            }
+
+            /* グリッドレイアウトのスマホ最適化（はみ出し防止） */
+            .grid-3,
+            .grid-2 {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            /* ヘッダー（ナビゲーション）のサイズを縮小して主張を抑える */
+            .navbar {
+                padding: 8px 5%;
+            }
+
+            .nav-logo-img {
+                width: 28px;
+            }
+
+            .nav-brand {
+                font-size: 1.1rem;
+            }
+
+            .nav-brand span {
+                font-size: 1.1rem;
+            }
+
+            .navbar .btn {
+                padding: 6px 14px !important;
+                font-size: 0.8rem !important;
             }
         }
     </style>
 </head>
 
 <body>
+
+    <!-- スクロール背景 -->
+    <div id="fixed-bg-container">
+        <div class="scroll-bg" id="bg-morning"></div>
+        <div class="scroll-bg" id="bg-noon"></div>
+        <div class="scroll-bg" id="bg-night"></div>
+    </div>
+    <div id="fixed-bg-overlay"></div>
 
     <!-- スプラッシュ画面 -->
     <div id="splash-screen">
@@ -676,6 +827,181 @@
         </div>
     </section>
 
+    <!-- 支援例・提供形態 -->
+    <section class="section">
+        <div class="fade-in">
+            <h2 class="sec-title">研修の提供形態と具体的な支援例</h2>
+            <p style="text-align: center; margin-bottom: 40px; color: var(--text-muted);">
+                各施設様の現状やご要望に合わせて、大きく分けて2つの形態をご用意しております。
+            </p>
+        </div>
+        <div class="grid-2">
+            <!-- パッケージ型 -->
+            <div class="card fade-in">
+                <span class="card-icon"><i class="fa-solid fa-box-open">📦</i></span>
+                <h3>パッケージ化された研修</h3>
+                <p>生成AIの基本的な知識から、実際にシミュレートを行う流れを通じて「何ができるのか」「何をしてはいけないのか」を体系的に学ぶための標準プログラムです。</p>
+                <div
+                    style="margin-top:20px; padding:15px; background:var(--bg-color); border-radius:10px; font-size:0.95rem;">
+                    <strong>【具体的な支援例】</strong><br>
+                    <ul style="margin-top: 10px; padding-left: 20px; list-style-type: disc; color: var(--text-main);">
+                        <li>全職員向け「生成AIリスクと活用基礎」研修</li>
+                        <li>現場業務でのAIシミュレート体験会</li>
+                        <li>よくある失敗例からの「べからず集」共有</li>
+                    </ul>
+                </div>
+            </div>
+            <!-- オーダーメイド型 -->
+            <div class="card fade-in" style="transition-delay: 0.1s;">
+                <span class="card-icon"><i class="fa-solid fa-handshake-angle">🤝</i></span>
+                <h3>オーダーメイド研修</h3>
+                <p>事前に担当者様としっかりと話し合いを行い、現場のウィークポイントやピンポイントで知りたいことなどを調整。ご依頼者様のためだけに実施する独自の研修です。</p>
+                <div
+                    style="margin-top:20px; padding:15px; background:var(--bg-color); border-radius:10px; font-size:0.95rem;">
+                    <strong>【具体的な支援例】</strong><br>
+                    <ul style="margin-top: 10px; padding-left: 20px; list-style-type: disc; color: var(--text-main);">
+                        <li>特定の帳票類作成に特化したAI活用ワークショップ</li>
+                        <li>施設独自のガイドライン策定に向けた管理者向け勉強会</li>
+                        <li>現在の業務フローに合わせたピンポイントな改善提案</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 料金プラン -->
+    <section id="pricing" class="section services-bg">
+        <div class="fade-in">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <span class="hero-badge" style="background:var(--white); border-color:var(--white);">料金プラン</span>
+            </div>
+            <h2 class="sec-title">プランと料金の目安</h2>
+        </div>
+        <div class="grid-2">
+            <!-- 料金プラン1 -->
+            <div class="program-card fade-in">
+                <div class="program-header" style="text-align: center;">
+                    <h3 style="margin-bottom: 5px;">パッケージ研修</h3>
+                    <p style="font-size: 0.95rem; opacity: 0.9;">体系的な基礎を学ぶ</p>
+                    <div
+                        style="font-size: 2.2rem; font-weight: 700; margin-top: 15px; font-family: 'Outfit', sans-serif;">
+                        要相談
+                    </div>
+                    <p style="font-size: 0.85rem; margin-top: 5px;">※実施時間・参加人数によりお見積りいたします</p>
+                </div>
+                <div class="program-body">
+                    <ul class="program-list">
+                        <li>生成AIの基礎知識とリスク解説</li>
+                        <li>シミュレート体験・ワークショップ</li>
+                        <li>標準テキスト・配布資料の提供</li>
+                        <li>質疑応答セッション</li>
+                    </ul>
+                    <div style="text-align: center; margin-top: 30px;">
+                        <a href="#contact" class="btn btn-outline" style="width: 100%;">詳細を問い合わせる</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 料金プラン2 -->
+            <div class="program-card fade-in" style="transition-delay: 0.1s;">
+                <div class="program-header"
+                    style="background: linear-gradient(135deg, var(--secondary), #059669); text-align: center;">
+                    <h3 style="margin-bottom: 5px;">オーダーメイド研修</h3>
+                    <p style="font-size: 0.95rem; opacity: 0.9;">課題に合わせた独自プログラム</p>
+                    <div
+                        style="font-size: 2.2rem; font-weight: 700; margin-top: 15px; font-family: 'Outfit', sans-serif;">
+                        個別お見積り
+                    </div>
+                    <p style="font-size: 0.85rem; margin-top: 5px;">※事前の綿密なヒアリングをもとにご提案します</p>
+                </div>
+                <div class="program-body">
+                    <ul class="program-list">
+                        <li>担当者様との事前の綿密な打ち合わせ</li>
+                        <li>現場課題に特化した独自カリキュラムの構築</li>
+                        <li>各施設専用のオリジナル教材・資料の作成</li>
+                        <li>研修後のフォローアップに関するご相談</li>
+                    </ul>
+                    <div style="text-align: center; margin-top: 30px;">
+                        <a href="#contact" class="btn btn-primary" style="width: 100%;">無料相談を申し込む</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 研修実績・支援事例 -->
+    <section id="achievements" class="section">
+        <div class="fade-in">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <span class="hero-badge"
+                    style="background: rgba(13, 148, 136, 0.1); color: var(--secondary); border-color: rgba(13, 148, 136, 0.2);">これまでの実績・支援事例</span>
+            </div>
+            <h2 class="sec-title">過去の講義内容と具体的な成果</h2>
+            <p style="text-align: center; margin-bottom: 40px; color: var(--text-muted);">
+                これまでに各地の福祉施設様や関連団体様にて実施した研修・支援の一部をご紹介します。
+            </p>
+        </div>
+
+        <div class="grid-3">
+            <!-- 実績1 -->
+            <div class="card fade-in">
+                <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700; margin-bottom: 10px;">
+                    新潟県社会福祉士会 様（設立30周年記念企画）</div>
+                <h3 style="font-size: 1.25rem; margin-bottom: 15px;">「スキルアップラジオ3.0」 生成AI導入講義</h3>
+                <div style="margin-bottom: 15px; font-size: 0.95rem;">
+                    <strong style="color: var(--primary);">【講義内容】</strong><br>
+                    同会の設立30周年記念企画にて講師として登壇。生成AIの基本的な仕組みと、業務利用におけるリスク（個人情報保護等）の解説から、事例検討での活用までを実演いたしました。
+                </div>
+                <div style="font-size: 0.95rem;">
+                    <strong style="color: var(--primary);">【今回のハイライト】</strong><br>
+                    AIに対する漠然とした不安の解消とリスク回避を前提としつつ、福祉現場での新たなツールとしての活用イメージを共有しました。
+                </div>
+                <div style="margin-top: 20px;">
+                    <span class="cert-tag"
+                        style="background: rgba(2, 132, 199, 0.1); color: var(--primary); border-color: rgba(2, 132, 199, 0.2);">基礎・リスク管理研修</span>
+                </div>
+            </div>
+
+            <!-- 実績2 -->
+            <div class="card fade-in" style="transition-delay: 0.1s;">
+                <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700; margin-bottom: 10px;">
+                    事例検討シミュレーション</div>
+                <h3 style="font-size: 1.25rem; margin-bottom: 15px;">独自の「講義支援統合ツール」の開発・実演</h3>
+                <div style="margin-bottom: 15px; font-size: 0.95rem;">
+                    <strong style="color: var(--secondary);">【支援内容】</strong><br>
+                    生成AI（Gemini Gems等）と連携し、架空事例のシミュレートから評価点グラフ化・総括用スライドの自動生成までを行う独自の統合環境を構築して実演しました。
+                </div>
+                <div style="font-size: 0.95rem;">
+                    <strong style="color: var(--secondary);">【今回のハイライト】</strong><br>
+                    ただ「知る」だけでなく、実際に現場の事例検討の場でAIシステムがどのように機能・補助し得るかをご体感いただきました。
+                </div>
+                <div style="margin-top: 20px;">
+                    <span class="cert-tag"
+                        style="background: rgba(13, 148, 136, 0.1); color: var(--secondary); border-color: rgba(13, 148, 136, 0.2);">ツール開発・活用</span>
+                </div>
+            </div>
+
+            <!-- 実績3 -->
+            <div class="card fade-in" style="transition-delay: 0.2s;">
+                <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700; margin-bottom: 10px;">
+                    システム・マクロ開発</div>
+                <h3 style="font-size: 1.25rem; margin-bottom: 15px;">現場課題に即した「業務効率化支援」</h3>
+                <div style="margin-bottom: 15px; font-size: 0.95rem;">
+                    <strong style="color: #4f46e5;">【支援内容】</strong><br>
+                    社会福祉士として現場で培った知見と、エンジニアとしての技術を掛け合わせ、現場の複雑なアナログ業務やExcel集計作業のマクロ(VBA等)化を通じたサポートを行っています。
+                </div>
+                <div style="font-size: 0.95rem;">
+                    <strong style="color: #4f46e5;">【期待される効果】</strong><br>
+                    現場職員のPCスキルに合わせた無理のないIT導入により、事務作業時間を削減し、本来のケアや対人援助に注力できる環境作りを目指します。
+                </div>
+                <div style="margin-top: 20px;">
+                    <span class="cert-tag"
+                        style="background: rgba(79, 70, 229, 0.1); color: #4f46e5; border-color: rgba(79, 70, 229, 0.2);">業務改善サポート</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- プロフィール -->
     <section class="section">
         <h2 class="sec-title fade-in">講師プロフィール</h2>
@@ -737,11 +1063,48 @@
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add('visible');
+                    } else {
+                        // 画面外に出た際にクラスを外し、再度スクロールした際にアニメーションさせる
+                        entry.target.classList.remove('visible');
                     }
                 });
-            }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+            }, { threshold: 0.15, rootMargin: "0px 0px -100px 0px" });
 
             fadeElements.forEach(el => observer.observe(el));
+
+            // ------------- 背景画像のシームレス切り替え -------------
+            const bgMorning = document.getElementById('bg-morning');
+            const bgNoon = document.getElementById('bg-noon');
+            const bgNight = document.getElementById('bg-night');
+
+            window.addEventListener('scroll', () => {
+                // スクロロールの総量を計算
+                const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                // 現在の進行度 (0.0 〜 1.0)
+                const scrollPercent = docHeight > 0 ? (window.scrollY / docHeight) : 0;
+
+                let volMorning = 0;
+                let volNoon = 0;
+                let volNight = 0;
+
+                if (scrollPercent < 0.5) {
+                    // 前半: 0%～50%で朝から昼へフェード
+                    const ratio = scrollPercent / 0.5; // 0 to 1
+                    volMorning = 1 - ratio;
+                    volNoon = ratio;
+                    volNight = 0;
+                } else {
+                    // 後半: 50%～100%で昼から夜へフェード
+                    const ratio = (scrollPercent - 0.5) / 0.5; // 0 to 1
+                    volMorning = 0;
+                    volNoon = 1 - ratio;
+                    volNight = ratio;
+                }
+
+                bgMorning.style.opacity = volMorning;
+                bgNoon.style.opacity = volNoon;
+                bgNight.style.opacity = volNight;
+            });
         });
     </script>
 </body>

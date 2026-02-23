@@ -1,0 +1,762 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>事例事例テキスト自動スライドパース</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap');
+
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-red: #fb7185;
+            --accent-green: #34d399;
+            --accent-yellow: #fbbf24;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            /* Default dark gradient for slide view */
+            background: radial-gradient(circle at top right, #1e293b, #0f172a);
+            background-attachment: fixed;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* Toggled via JS for Print view */
+        body.print-mode {
+            background: #f3f4f6;
+            color: #111827;
+        }
+
+        /* ----- Upload Screen ----- */
+        #upload-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100vh;
+            padding: 20px;
+        }
+
+        .upload-container {
+            background: rgba(30, 41, 59, 0.8);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 60px 40px;
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .upload-container.dragover {
+            background: rgba(56, 189, 248, 0.1);
+            border-color: var(--accent-blue);
+            transform: scale(1.02);
+        }
+
+        .upload-container h1 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: var(--text-main);
+        }
+
+        .upload-container p {
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .file-upload-btn-container {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .btn {
+            background: var(--accent-blue);
+            color: #fff;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: #0284c7;
+        }
+
+        .upload-container textarea {
+            width: 100%;
+            height: 250px;
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            color: var(--text-main);
+            font-size: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            margin-bottom: 20px;
+            transition: border-color 0.3s ease;
+        }
+
+        .upload-container textarea:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+
+        /* ----- Presentation Screen (Slide View) ----- */
+        #presentation-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            width: 100%;
+            padding: 2rem 1rem;
+        }
+
+        .slide {
+            width: 100%;
+            max-width: 900px;
+            height: auto;
+            padding: 40px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.8s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .slide header h1 {
+            font-size: 2.6rem;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .slide header .subtitle {
+            font-size: 1.8rem;
+            color: var(--accent-blue);
+            font-weight: 500;
+        }
+
+        .content-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 36px;
+            width: 100%;
+        }
+
+        .card {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 24px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .card h2 {
+            font-size: 2.2rem;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: #fff;
+            border-bottom: 2px dashed rgba(255, 255, 255, 0.1);
+            padding-bottom: 15px;
+        }
+
+        .card.overview h2::before {
+            content: "";
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--accent-blue);
+        }
+
+        .card.physical-mental h2::before {
+            content: "";
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--accent-red);
+        }
+
+        .card.economy h2::before {
+            content: "";
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--accent-yellow);
+        }
+
+        .card.strengths h2::before {
+            content: "";
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--accent-green);
+        }
+
+        .card-content {
+            font-size: 2.0rem;
+            line-height: 1.8;
+            color: var(--text-main);
+            font-weight: 500;
+            white-space: pre-wrap;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .tag {
+            background: rgba(52, 211, 153, 0.15);
+            color: var(--accent-green);
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-size: 1.6rem;
+            font-weight: 700;
+            border: 1px solid rgba(52, 211, 153, 0.3);
+        }
+
+        @media (max-width: 600px) {
+            .slide {
+                padding: 30px 20px;
+                border-radius: 12px;
+                border-left: none;
+                border-right: none;
+            }
+
+            #presentation-screen {
+                padding: 1rem 0.5rem;
+                gap: 20px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .card h2 {
+                font-size: 2.0rem;
+            }
+
+            .card-content {
+                font-size: 1.8rem;
+            }
+
+            .tag {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* ----- Print Layout Screen (A4) ----- */
+        #print-layout-screen {
+            display: none;
+            width: 100%;
+            padding: 40px 20px;
+            flex-direction: column;
+            align-items: center;
+            color: #111827;
+        }
+
+        .a4-page {
+            background: #fff;
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+        }
+
+        .a4-page .doc-title {
+            font-size: 24pt;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #111827;
+        }
+
+        .a4-page .section {
+            margin-bottom: 25px;
+        }
+
+        .a4-page .section h2 {
+            font-size: 14pt;
+            color: #1f2937;
+            margin-bottom: 12px;
+            padding-left: 10px;
+            border-left: 5px solid #2563eb;
+            background: #f3f4f6;
+            padding: 5px 10px;
+            border-bottom: none;
+            display: block;
+        }
+
+        .a4-page .section-content {
+            font-size: 11pt;
+            line-height: 1.7;
+            color: #374151;
+            white-space: pre-wrap;
+            padding: 0 10px;
+            font-weight: normal;
+        }
+
+        .a4-page .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 0 10px;
+        }
+
+        .a4-page .tag {
+            background: #dcfce7;
+            color: #166534;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 11pt;
+            border: 1px solid #bbf7d0;
+        }
+
+        /* ----- Controls ----- */
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: none;
+            gap: 10px;
+            z-index: 100;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .controls button {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .controls button:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .controls button.action-btn {
+            background: rgba(56, 189, 248, 0.9);
+        }
+
+        .controls button.switch-btn {
+            background: #8b5cf6;
+        }
+
+        /* Light mode controls styling */
+        body.print-mode .controls button {
+            background: #fff;
+            border: 1px solid #d1d5db;
+            color: #374151;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body.print-mode .controls button.action-btn {
+            background: #2563eb;
+            color: #fff;
+            border: none;
+        }
+
+        body.print-mode .controls button.switch-btn {
+            background: #1f2937;
+            color: #fff;
+            border: none;
+        }
+
+        body.print-mode .controls button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        /* ----- True Print Handling ----- */
+        @media print {
+            body {
+                background: #fff !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .controls,
+            #upload-screen {
+                display: none !important;
+            }
+
+            /* Printing Slide mode */
+            body:not(.print-mode) {
+                color: #f8fafc !important;
+            }
+
+            body:not(.print-mode) .slide {
+                max-width: none !important;
+                width: 100% !important;
+                box-shadow: none !important;
+                border: none !important;
+                page-break-after: always;
+                padding: 10mm 15mm !important;
+                height: auto !important;
+                margin: 0 !important;
+                background: #1e293b !important;
+            }
+
+            body:not(.print-mode) #presentation-screen {
+                padding: 0 !important;
+                gap: 0 !important;
+                display: block !important;
+            }
+
+            body:not(.print-mode) .card {
+                background: #0f172a !important;
+                border: 1px solid rgba(255, 255, 255, 0.2) !important;
+                page-break-inside: avoid;
+            }
+
+            body:not(.print-mode) header {
+                page-break-after: avoid;
+            }
+
+            body:not(.print-mode) #print-layout-screen {
+                display: none !important;
+            }
+
+            /* Printing A4 mode */
+            body.print-mode #presentation-screen {
+                display: none !important;
+            }
+
+            body.print-mode {
+                color: #111827 !important;
+                display: block !important;
+            }
+
+            body.print-mode #print-layout-screen {
+                display: block !important;
+                padding: 0 !important;
+            }
+
+            body.print-mode .a4-page {
+                width: 100% !important;
+                min-height: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+            }
+
+            body.print-mode .section {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Upload Screen -->
+    <div id="upload-screen">
+        <div class="upload-container">
+            <h1>📄 事例文書からスライドを自動生成</h1>
+            <p>指定のフォーマットの事例テキストを<br>下のボックスに貼り付けて「生成する」を押してください。</p>
+            <textarea id="text-input" placeholder="ここに事例テキストを貼り付けてください..."></textarea>
+            <div class="file-upload-btn-container">
+                <button class="btn" id="generate-btn">生成する</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. Presentation Screen (Dark / Huge Text) -->
+    <div id="presentation-screen">
+        <div class="slide">
+            <header>
+                <h1 id="s-title-1"></h1>
+                <p class="subtitle">概要・アセスメント①（生活・状況・家族）</p>
+            </header>
+            <div class="content-grid single-col">
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    <section class="card overview">
+                        <h2>📌 ケース概要</h2>
+                        <div class="card-content" id="s-overview"></div>
+                    </section>
+                    <section class="card physical-mental">
+                        <h2>🗣 本人の主訴</h2>
+                        <div class="card-content" id="s-complaint"
+                            style="border-left: 4px solid var(--accent-red); padding-left: 10px; background: rgba(251, 113, 133, 0.05);">
+                        </div>
+                    </section>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    <section class="card overview">
+                        <h2>👥 登場人物・家族構成</h2>
+                        <div class="card-content" id="s-characters"
+                            style="margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px;">
+                        </div>
+                        <div class="card-content" id="s-family"></div>
+                    </section>
+                </div>
+            </div>
+            <div style="text-align: right; color: var(--text-muted); font-size: 0.9rem; margin-top: auto;">ページ 1 / 2
+            </div>
+        </div>
+        <div class="slide">
+            <header>
+                <h1 id="s-title-2"></h1>
+                <p class="subtitle">アセスメント②（身体・経済・強みと深層心理）</p>
+            </header>
+            <div class="content-grid single-col">
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    <section class="card physical-mental">
+                        <h2>🩺 身体・精神状況</h2>
+                        <div class="card-content" id="s-physical"></div>
+                    </section>
+                    <section class="card economy">
+                        <h2>💰 経済・生活基盤</h2>
+                        <div class="card-content" id="s-economy"></div>
+                    </section>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                    <section class="card strengths">
+                        <h2>✨ 本人のストレングス</h2>
+                        <div class="tags" id="s-strengths"></div>
+                    </section>
+                    <section class="card economy" style="border-color: var(--accent-yellow);">
+                        <h2>📖 象徴する具体的なエピソード</h2>
+                        <div class="card-content" id="s-episodes"></div>
+                    </section>
+                </div>
+            </div>
+            <div style="text-align: right; color: var(--text-muted); font-size: 0.9rem; margin-top: auto;">ページ 2 / 2
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Print Layout Screen (A4 / White) -->
+    <div id="print-layout-screen">
+        <div class="a4-page">
+            <h1 class="doc-title" id="p-title"></h1>
+            <div class="section">
+                <h2>📌 ケース概要</h2>
+                <div class="section-content" id="p-overview"></div>
+            </div>
+            <div class="section">
+                <h2 style="border-left-color: #ef4444;">🗣 本人の主訴</h2>
+                <div class="section-content" id="p-complaint"></div>
+            </div>
+            <div class="section">
+                <h2 style="border-left-color: #8b5cf6;">👥 登場人物・家族構成</h2>
+                <div class="section-content" id="p-characters" style="margin-bottom: 10px;"></div>
+                <div class="section-content" id="p-family"></div>
+            </div>
+            <div class="section">
+                <h2 style="border-left-color: #f59e0b;">🩺 身体・精神状況</h2>
+                <div class="section-content" id="p-physical"></div>
+            </div>
+            <div class="section">
+                <h2 style="border-left-color: #10b981;">💰 経済・生活基盤</h2>
+                <div class="section-content" id="p-economy"></div>
+            </div>
+            <div class="section">
+                <h2 style="border-left-color: #059669;">✨ 本人のストレングス</h2>
+                <div class="tags" id="p-strengths"></div>
+            </div>
+            <div class="section">
+                <h2 style="border-left-color: #6366f1;">📖 象徴する具体的なエピソード</h2>
+                <div class="section-content" id="p-episodes"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shared Controls -->
+    <div class="controls" id="controls">
+        <button id="toggle-btn" class="switch-btn" onclick="toggleLayout()">📄 A4印刷レイアウトに切替</button>
+        <button id="print-btn" class="action-btn" onclick="exportToPDF()">🖨️ PDFとして保存 (印刷)</button>
+        <button onclick="location.reload()">↺ 新規ロード</button>
+    </div>
+
+    <script>
+        let isPrintMode = false;
+
+        const generateBtn = document.getElementById('generate-btn');
+        const textInput = document.getElementById('text-input');
+
+        generateBtn.addEventListener('click', () => {
+            const text = textInput.value;
+            if (text.trim()) {
+                parseAndRender(text);
+            } else {
+                alert("テキストを入力してください。");
+            }
+        });
+
+        function toggleLayout() {
+            isPrintMode = !isPrintMode;
+            if (isPrintMode) {
+                document.body.classList.add('print-mode');
+                document.getElementById('presentation-screen').style.display = 'none';
+                document.getElementById('print-layout-screen').style.display = 'flex';
+                document.getElementById('toggle-btn').innerText = '🌃 プレゼン用スライドに切替';
+                document.getElementById('print-btn').innerText = '🖨️ A4レイアウトをPDF印刷';
+            } else {
+                document.body.classList.remove('print-mode');
+                document.getElementById('presentation-screen').style.display = 'flex';
+                document.getElementById('print-layout-screen').style.display = 'none';
+                document.getElementById('toggle-btn').innerText = '📄 A4印刷レイアウトに切替';
+                document.getElementById('print-btn').innerText = '🖨️ スライド版をPDF印刷';
+            }
+        }
+
+        function parseAndRender(text) {
+            const lines = text.split(/\r?\n/);
+            const data = { title: '事例研究', overview: '', complaint: '', characters: '', physical: '', economy: '', family: '', strengths: [], episodes: '' };
+            let currentSection = null;
+
+            lines.forEach(line => {
+                const textLine = line.trim();
+                if (!textLine) {
+                    if (currentSection && !['strengths'].includes(currentSection)) data[currentSection] += '\n';
+                    return;
+                }
+                if (textLine.startsWith('【事例：') || textLine.startsWith('【事例タイトル：')) { data.title = textLine.replace('【', '').replace('】', '').replace('事例：', '').replace('事例タイトル：', ''); return; }
+                if (textLine.includes('・ケース概要') || textLine.includes('【ケース概要】')) { currentSection = 'overview'; return; }
+                if (textLine.includes('・本人の主訴') || textLine.includes('【本人の主訴】')) { currentSection = 'complaint'; return; }
+                if (textLine.includes('・登場人物') || textLine.includes('【登場人物】')) { currentSection = 'characters'; return; }
+                if (textLine.includes('・アセスメント詳細') || textLine.includes('【アセスメント詳細】')) { currentSection = null; return; }
+                if (textLine.includes('１．身体・精神状況')) { currentSection = 'physical'; return; }
+                if (textLine.includes('２．経済・生活基盤')) { currentSection = 'economy'; return; }
+                if (textLine.includes('３．家族構成')) { currentSection = 'family'; return; }
+                if (textLine.includes('４．本人のストレングス')) { currentSection = 'strengths'; return; }
+                if (textLine.includes('５．本人を象徴する')) { currentSection = 'episodes'; return; }
+
+                if (currentSection === 'overview') data.overview += String(textLine) + '\n';
+                else if (currentSection === 'complaint') data.complaint += String(textLine) + '\n';
+                else if (currentSection === 'characters') data.characters += String(textLine) + '\n';
+                else if (currentSection === 'physical') data.physical += String(textLine) + '\n';
+                else if (currentSection === 'economy') data.economy += String(textLine) + '\n';
+                else if (currentSection === 'family') data.family += String(textLine) + '\n';
+                else if (currentSection === 'strengths') data.strengths.push(textLine);
+                else if (currentSection === 'episodes') data.episodes += String(textLine) + '\n';
+            });
+
+            // Populate Slide View
+            document.getElementById('s-title-1').innerText = data.title;
+            document.getElementById('s-title-2').innerText = data.title;
+            document.getElementById('s-overview').innerText = data.overview.trim();
+            document.getElementById('s-complaint').innerText = data.complaint.trim();
+            document.getElementById('s-characters').innerText = data.characters.trim();
+            document.getElementById('s-family').innerText = data.family.trim();
+            document.getElementById('s-physical').innerText = data.physical.trim();
+            document.getElementById('s-economy').innerText = data.economy.trim();
+            document.getElementById('s-episodes').innerText = data.episodes.trim();
+
+            const slideStrContainer = document.getElementById('s-strengths');
+            slideStrContainer.innerHTML = '';
+            data.strengths.forEach(s => { const t = document.createElement('span'); t.className = 'tag'; t.innerText = s; slideStrContainer.appendChild(t); });
+
+            // Populate Print View
+            document.getElementById('p-title').innerText = data.title;
+            document.getElementById('p-overview').innerText = data.overview.trim();
+            document.getElementById('p-complaint').innerText = data.complaint.trim();
+            document.getElementById('p-characters').innerText = data.characters.trim();
+            document.getElementById('p-family').innerText = data.family.trim();
+            document.getElementById('p-physical').innerText = data.physical.trim();
+            document.getElementById('p-economy').innerText = data.economy.trim();
+            document.getElementById('p-episodes').innerText = data.episodes.trim();
+
+            const printStrContainer = document.getElementById('p-strengths');
+            printStrContainer.innerHTML = '';
+            data.strengths.forEach(s => { const t = document.createElement('span'); t.className = 'tag'; t.innerText = s; printStrContainer.appendChild(t); });
+
+            // Initial view state (Slide View default)
+            document.getElementById('upload-screen').style.display = 'none';
+            document.getElementById('presentation-screen').style.display = 'flex';
+            document.getElementById('print-layout-screen').style.display = 'none';
+            document.getElementById('controls').style.display = 'flex';
+        }
+
+        function exportToPDF() {
+            if (!isPrintMode) {
+                alert("綺麗なPDFとしてスライド保存するために、\n印刷画面で【詳細設定】の「背景のグラフィックス」にチェックを入れてください。");
+            }
+            window.print();
+        }
+    </script>
+</body>
+
+</html>
