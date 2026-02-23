@@ -5,71 +5,316 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>K.Daisuke Works | 社会福祉士 × IT</title>
+
+    <!-- Google Fonts の読み込み（モダンなフォントを使用） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Noto+Sans+JP:wght@300;400;700&display=swap"
+        rel="stylesheet">
+
     <style>
+        /* 全体のカラースキームや変数の設定（ダークテーマ×グラスモーフィズム） */
+        :root {
+            --bg-color: #0f172a;
+            /* 深いネイビーの背景 */
+            --text-main: #f8fafc;
+            /* 白に近いグレーのテキスト */
+            --text-muted: #94a3b8;
+            /* 少し暗めのテキスト */
+            --accent: #38bdf8;
+            /* アクセントカラーのシアン */
+            --card-bg: rgba(255, 255, 255, 0.03);
+            /* 半透明のカード背景 */
+            --card-border: rgba(255, 255, 255, 0.08);
+            /* カードの枠線 */
+        }
+
         body {
-            font-family: sans-serif;
-            line-height: 1.6;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            color: #333;
-        }
-
-        header {
-            border-bottom: 2px solid #007bff;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-        }
-
-        h1 {
             margin: 0;
-            color: #007bff;
+            padding: 0;
+            font-family: 'Outfit', 'Noto Sans JP', sans-serif;
+            background: linear-gradient(135deg, #020617 0%, #0f172a 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .contact {
-            background: #f4f4f4;
-            padding: 15px;
-            border-radius: 5px;
+        /* --- スプラッシュ画面（ローディング画面） --- */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #020617;
+            /* 最背面の色 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease-in-out, visibility 0.8s;
         }
 
-        .tag {
+        .splash-logo {
+            font-size: 2.8rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            opacity: 0;
+            transform: translateY(20px);
+            /* 上にふわっと上がってくるアニメーション */
+            animation: logoFadeUp 1.5s ease forwards;
+        }
+
+        .splash-logo span {
+            color: var(--accent);
+            /* "Works" の部分だけアクセントカラー */
+        }
+
+        @keyframes logoFadeUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            50% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 読み込み完了後にスプラッシュ画面を消すためのクラス */
+        body.loaded #splash-screen {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        /* --- メインコンテンツ --- */
+        #main-content {
+            opacity: 0;
+            transform: translateY(30px);
+            /* スプラッシュ画面が消えるのと同時に少し遅れてフェードイン */
+            transition: opacity 1s ease 0.5s, transform 1s ease 0.5s;
+            max-width: 800px;
+            width: 90%;
+            padding: 60px 0;
+            box-sizing: border-box;
+        }
+
+        /* 読み込み完了後のメインコンテンツの状態 */
+        body.loaded #main-content {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ヘッダー部分 */
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            margin: 0;
+            font-weight: 700;
+            letter-spacing: 1px;
+            /* グラデーションテキスト */
+            background: linear-gradient(90deg, #f8fafc, #38bdf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-top: 10px;
+        }
+
+        /* グラスモーフィズム（すりガラス効果）を適用したカード */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        /* マウスを乗せた時のホバーエフェクト */
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            border-color: rgba(56, 189, 248, 0.3);
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            color: var(--text-main);
+            margin-top: 0;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 10px;
             display: inline-block;
-            background: #007bff;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 3px;
-            font-size: 0.9em;
+        }
+
+        .profile-text {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            margin-bottom: 30px;
+            color: #cbd5e1;
+        }
+
+        .list-items {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .list-items li {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            line-height: 1.6;
+        }
+
+        /* 装飾的なタグ */
+        .tag {
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            white-space: nowrap;
+            letter-spacing: 1px;
+        }
+
+        .contact-info {
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        /* メールボタンのデザイン */
+        .email-link {
+            display: inline-block;
+            margin-top: 25px;
+            font-size: 1.2rem;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 12px 35px;
+            border-radius: 30px;
+            background: linear-gradient(135deg, #0ea5e9, #2563eb);
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+        }
+
+        .email-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.5);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* スマホ向けのレイアウト調整 */
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 2.2rem;
+            }
+
+            .card {
+                padding: 25px;
+            }
+
+            .list-items li {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .splash-logo {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
 
 <body>
-    <header>
-        <h1>河村 大介 / K.Daisuke</h1>
-        <p>社会福祉士 | ITエンジニア（VBAエキスパート）</p>
-    </header>
 
-    <section>
-        <h2>Profile</h2>
-        <p>社会福祉現場の課題をITで解決する「現場発のDX」を推進しています。</p>
-        <ul>
-            <li><span class="tag">資格</span> 社会福祉士 / ITパスポート / VBAエキスパート スタンダード</li>
-            <li><span class="tag">実績</span> 業務効率化ツールの開発により、年間960時間の労働時間削減を達成</li>
-            <li><span class="tag">拠点</span> 新潟県</li>
-        </ul>
-    </section>
-
-    <section>
-        <h2>Contact</h2>
-        <div class="contact">
-            <p>お仕事のご依頼・ご相談はこちらまで</p>
-            <p>Mail: <strong>k.daisuke.works@gmail.com</strong></p>
+    <!-- 1. スプラッシュ（ローディング）画面 -->
+    <div id="splash-screen">
+        <div class="splash-logo">
+            K.Daisuke <span>Works</span>
         </div>
-    </section>
-    <footer>
-        <p>&copy; 2026 K.Daisuke Works</p>
-    </footer>
-    <!-- 自動コミットのテストです -->
+    </div>
+
+    <!-- 2. メインコンテンツ（最初は非表示） -->
+    <div id="main-content">
+        <header>
+            <h1>K.Daisuke Works</h1>
+            <p>社会福祉士 | ITエンジニア（VBAエキスパート）</p>
+        </header>
+
+        <section class="card">
+            <h2>Profile</h2>
+            <p class="profile-text">
+                社会福祉現場の課題をITで解決する「現場発のDX」を推進しています。<br>
+                現場の目線とエンジニアの技術を掛け合わせ、本当に使いやすいシステムの構築を目指します。
+            </p>
+            <ul class="list-items">
+                <li><span class="tag">資格</span> <span>社会福祉士 / ITパスポート / VBAエキスパート スタンダード</span></li>
+                <li><span class="tag">実績</span> <span>業務効率化ツールの開発により、年間960時間の労働時間削減を達成</span></li>
+                <li><span class="tag">拠点</span> <span>新潟県</span></li>
+            </ul>
+        </section>
+
+        <section class="card">
+            <h2>Contact</h2>
+            <div class="contact-info">
+                <p>お仕事のご依頼・ご相談などはこちらのメールアドレスまでお願いいたします。</p>
+                <a href="mailto:k.daisuke.works@gmail.com" class="email-link">
+                    ✉ k.daisuke.works@gmail.com
+                </a>
+            </div>
+        </section>
+
+        <footer>
+            <p>&copy; 2026 K.Daisuke Works</p>
+            <!-- 自動コミットのテストです -->
+        </footer>
+    </div>
+
+    <!-- スプラッシュ画面を制御するJavaScript -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // ページ読み込み完了後、2秒（2000ミリ秒）待機してから表示を切り替える
+            setTimeout(() => {
+                // body要素に 'loaded' クラスを追加すると、CSSのアニメーションが発動してメインコンテンツが表示される
+                document.body.classList.add('loaded');
+            }, 2000);
+        });
+    </script>
 </body>
 
 </html>
